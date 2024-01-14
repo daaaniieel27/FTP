@@ -1,22 +1,28 @@
-### Configuration files FTP Server (Anonymous)
+### Archivos de configuración Servidor FTP (Anonymous)
 **.message**
 ```
-  ________   ________  ________  ___       ___       ___  ________  ________     
- |\   __  \ |\   __  \|\   __  \|\  \     |\  \     |\  \|\   __  \|\   __  \    
- \ \  \|\  \\ \  \|\  \\ \  \|\  \ \  \    \ \  \    \ \  \ \  \|\  \ \  \|\  \   
-  \ \   __  \\ \   __  \\ \   ____\ \  \    \ \  \  __\ \  \ \   ____\ \   ____\  
-   \ \  \ \  \\ \  \ \  \\ \  \___| \  \____\ \  \|\__\_\  \ \  \___| \  \___|  
-    \ \__\ \__\\ \__\ \__\\ \__\     \_______\ \____________\ \__\     \__\     
-     \|__|\|__| \|__|\|__| \|__|      \|_______|\|____________|\|__|      \|__|    
+  __       __  ________  __        ______    ______   __       __  ________ 
+|  \  _  |  \|        \|  \      /      \  /      \ |  \     /  \|        \
+| $$ / \ | $$| $$$$$$$$| $$     |  $$$$$$\|  $$$$$$\| $$\   /  $$| $$$$$$$$
+| $$/  $\| $$| $$__    | $$     | $$   \$$| $$  | $$| $$$\ /  $$$| $$__    
+| $$  $$$\ $$| $$  \   | $$     | $$      | $$  | $$| $$$$\  $$$$| $$  \   
+| $$ $$\$$\$$| $$$$$   | $$     | $$   __ | $$  | $$| $$\$$ $$ $$| $$$$$   
+| $$$$  \$$$$| $$_____ | $$_____| $$__/  \| $$__/ $$| $$ \$$$| $$| $$_____ 
+| $$$    \$$$| $$     \| $$     \\$$    $$ \$$    $$| $$  \$ | $$| $$     \
+ \$$      \$$ \$$$$$$$$ \$$$$$$$$ \$$$$$$   \$$$$$$  \$$      \$$ \$$$$$$$$
 
 
 
 ```
 **resolv.conf**
+
+Configuración del sistema para la resolución de nombres.
 ```
 nameserver 192.168.57.10
 ```
 **vsftpd.conf**
+
+Configuración principal del servidor FTP anónimo.
 ```
 listen=YES
 listen_ipv6=NO
@@ -36,8 +42,10 @@ dirmessage_enable=YES
 ```
 
 
-### Configuration files FTP Server (Local Users)
+### Archivos de configuración Servidor FTP (Usuarios locales)
 **vsftpd.conf**
+
+Configuración principal del servidor FTP para usuarios locales.
 ```
 listen=YES
 listen_ipv6=NO
@@ -61,17 +69,23 @@ rsa_private_key_file=/etc/ssl/private/vsftpd.key
 ssl_enable=YES
 ```
 **resolv.conf**
+
+Configuración del sistema para la resolución de nombres.
 ```
 nameserver 192.168.57.10
 ```
 **vsftpd_chroot_list**
+
+Lista de usuarios permitidos para chroot.
 ```
 charles
 ```
 
 
-### Configuration files DNS Server
+### Archivos de configuración Servidor DNS
 **named.conf.local**
+
+Configuración de las zonas locales del servidor DNS.
 ```
 zone "db.sri" {
         type master;
@@ -85,6 +99,8 @@ zone "57.168.192.in-addr.arpa" {
 
 ```
 **named.conf.options**
+
+Opciones de configuración global del servidor DNS.
 ```
 options {
         directory "/var/cache/bind";
@@ -94,10 +110,6 @@ options {
               1.1.1.1;
         };
 
-        //========================================================================
-        // If BIND logs error messages about the root key being expired,
-        // you will need to update your keys.  See https://www.isc.org/bind-keys
-        //========================================================================
         dnssec-validation yes;
 
         listen-on-v6 { any; };
@@ -105,6 +117,8 @@ options {
 
 ```
 **db.sri.dns**
+
+Zona directa del servidor DNS.
 ```
 ;
 ; Zone file for db.sri
@@ -118,15 +132,17 @@ $TTL    604800
 			2419200		; Expire
 			  86400 )	; Negative Cache TTL
 
-; Name servers
+; 
 @       IN      NS      ns
 
-; FTP servers
-ns.db.sri.	IN	A		192.168.57.10
-mirror.db.sri.	IN  A       192.168.57.30
-ftp.db.sri.	IN  A       192.168.57.20
+; 
+ns.db.sri.	IN	A	192.168.57.10
+mirror.db.sri.	IN  	A       192.168.57.30
+ftp.db.sri.	IN  	A       192.168.57.20
 ```
 **db.sri.rev**
+
+Zona inversa del servidor DNS.
 ```
 ;
 ; Reverse zone file for db.sri
@@ -141,10 +157,10 @@ $TTL	86400
 			  7200 )	; Negative Cache TTL
 ;
 
-@			IN	NS	ns.db.sri.
-10			IN	PTR	ns.db.sri.
-20			IN	PTR	ftp.db.sri.
-30			IN	PTR	mirror.db.sri.
+@		IN	NS	ns.db.sri.
+10		IN	PTR	ns.db.sri.
+20		IN	PTR	ftp.db.sri.
+30		IN	PTR	mirror.db.sri.
 ```
 
 
@@ -154,13 +170,15 @@ $TTL	86400
 
 ### FTP Server (Anonymous)
 ```
+#!/bin/bash
+
 export DEBIAN_FRONTERED=noninteractive
 
-#First we update and upgrade
 apt-get -y update
 apt-get -y upgrade
 
-#We install FTP server software on the assigned machine
+
+# Instalamos el servicio ftp
 sudo apt -y install vsftpd
 
 cp /vagrant/files/anonymous/vsftpd.conf /etc/vsftpd.conf 
@@ -180,11 +198,11 @@ unset DEBIAN_FRONTERED
 #!/bin/bash
 export DEBIAN_FRONTERED=noninteractive
 
-# Actualizar lista de paquetes e instalar paquetes necesarios
+# Actualizamoz e instalamos ftp
 sudo apt-get update
 sudo apt-get install -y vsftpd
 
-# Crear usuarios locales
+# Creamos los usuarios
 sudo useradd -m -p 1234 charles
 sudo useradd -m -p 1234 laura
 
@@ -193,7 +211,7 @@ sudo apt-get install vsftpd
 
 sudo apt-get update
 
-# Crear claves y certificados SSL
+# Creamos las claves y los certificados SSL necesarios
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout "/etc/ssl/private/vsftpd.key" -out "/etc/ssl/certs/vsftpd.crt" -subj "/O=Usuario/CN=Usuario" -passout "pass:Admin1.@"
 
 sudo cp /vagrant/files/ftp/resolv.conf /etc/
@@ -208,13 +226,14 @@ sudo cp /vagrant/files/ftp/vsftpd.conf /etc/
 
 sudo systemctl restart vsftpd
 
-# Corregir errores de espacio en /etc/vsftpd.conf
+# Corrige los errores de espacios en /etc/vsftpd.conf
 sudo sed -i 's,\r,,;s, *$,,' /etc/vsftpd.conf
 
 # Reiniciar el servicio vsftpd
 sudo service vsftpd restart
 
 unset DEBIAN_FRONTERED
+
 ```
 
 ### DNS Server
@@ -223,12 +242,10 @@ unset DEBIAN_FRONTERED
 
 export DEBIAN_FRONTERED=noninteractive
 
-#First we update and upgrade
-
 apt-get -y update
 apt-get -y upgrade
 
-#We install DNS server software on the assigned machine
+#Instalamos el servicio bind9 para configurar el servidor DNS
 
 sudo apt-get -y update
 sudo apt-get -y install bind9
@@ -242,4 +259,5 @@ cp /vagrant/files/resolv.conf /etc/resolv.conf
 sudo systemctl restart bind9
 
 unset DEBIAN_FRONTERED
+
 ```
